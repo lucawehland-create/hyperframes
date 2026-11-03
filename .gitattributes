@@ -55,3 +55,6 @@ registry/**/*.html linguist-vendored
 examples/docs-reference-project/**/*.wav filter=lfs diff=lfs merge=lfs -text
 
 packages/cli/src/cloud/_gen/** linguist-generated=true
+
+# Audio for local video projects
+videos/**/*.mp3 filter=lfs diff=lfs merge=lfs -text

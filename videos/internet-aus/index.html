@@ -1,0 +1,390 @@
+<!doctype html>
+<html
+  lang="de"
+  data-resolution="portrait"
+  data-composition-variables='[{"id":"accent","type":"color","label":"Akzentfarbe","default":"#ffd27a"},{"id":"hook","type":"string","label":"Hook","default":"Was wäre, wenn das Internet 24 Stunden ausfällt?"}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #0b0d12;
+        --ink: #f6f1e7;
+        --accent: #ffd27a;
+        --serif: "EB Garamond", serif;
+        --sans: "Inter", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--ground);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--serif);
+      }
+      #world {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        z-index: 1;
+      }
+      #world canvas {
+        display: block;
+        width: 1080px;
+        height: 1920px;
+      }
+      #scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.72) 0%,
+            rgba(0, 0, 0, 0.6) 18%,
+            rgba(0, 0, 0, 0) 32%
+          ),
+          linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 45%);
+      }
+      #endscrim {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background: rgba(6, 8, 12, 0.62);
+        opacity: 0;
+      }
+      #hud {
+        position: absolute;
+        left: 88px;
+        top: 214px;
+        z-index: 5;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+      }
+      #hud-label,
+      #hud-sub,
+      #hud-sub2 {
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 28px;
+        letter-spacing: 0.16em;
+      }
+      #hud-sub2 {
+        white-space: pre-line;
+        font-size: 24px !important;
+      }
+      #hud-label {
+        color: rgba(246, 241, 231, 0.85);
+      }
+      #hud-value {
+        font-family: var(--serif);
+        font-size: 104px;
+        line-height: 1.02;
+        font-variant-numeric: tabular-nums;
+      }
+      #hud-sub {
+        color: var(--accent);
+        margin-top: 6px;
+      }
+      #hud-sub2 {
+        color: rgba(246, 241, 231, 0.85);
+        margin-top: 14px;
+      }
+      .cap {
+        position: absolute;
+        left: 110px;
+        width: 860px;
+        top: 1080px;
+        z-index: 6;
+        text-align: center;
+      }
+      .cap span {
+        display: block;
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 64px;
+        line-height: 1.16;
+        color: var(--ink);
+        text-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.6),
+          0 4px 30px rgba(0, 0, 0, 0.75);
+      }
+      #hook {
+        position: absolute;
+        left: 90px;
+        width: 900px;
+        top: 300px;
+        z-index: 6;
+        text-align: center;
+      }
+      #hook span {
+        display: block;
+        font-family: var(--serif);
+        font-size: 96px;
+        line-height: 1.06;
+        text-shadow: 0 4px 34px rgba(0, 0, 0, 0.8);
+      }
+      #flash,
+      #dip {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #flash {
+        background: #fff;
+      }
+      #dip {
+        background: #000;
+      }
+      #end {
+        position: absolute;
+        left: 90px;
+        width: 900px;
+        top: 700px;
+        z-index: 6;
+        text-align: center;
+      }
+      #end-q {
+        display: block;
+        font-family: var(--serif);
+        font-size: 80px;
+        line-height: 1.08;
+      }
+      #end-a {
+        display: block;
+        margin-top: 48px;
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 50px;
+        line-height: 1.25;
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="80"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div
+        id="world"
+        class="clip"
+        data-start="0"
+        data-duration="80"
+        data-track-index="0"
+        data-track-kind="graphics"
+        data-layout-ignore
+      ></div>
+      <div id="scrim" data-layout-ignore></div>
+      <div id="endscrim" data-layout-ignore></div>
+
+      <div id="hud">
+        <div id="hud-label">UHRZEIT</div>
+        <div id="hud-value">00:00</div>
+        <div id="hud-sub">&nbsp;</div>
+        <div id="hud-sub2">&nbsp;</div>
+      </div>
+
+      <div id="hook" class="clip" data-start="0" data-duration="5" data-track-index="2">
+        <span id="hook-t" data-var-text="hook"
+          >Was wäre, wenn das Internet 24 Stunden ausfällt?</span
+        >
+      </div>
+
+      <div id="c2" class="cap clip" data-start="5.4" data-duration="4" data-track-index="3">
+        <span>00:00 Uhr: Das Internet fällt aus. Weltweit.</span>
+      </div>
+      <div id="c3" class="cap clip" data-start="9.6" data-duration="4.2" data-track-index="3">
+        <span>Die meisten schlafen. Noch merkt es keiner.</span>
+      </div>
+      <div id="c4" class="cap clip" data-start="14.3" data-duration="4.5" data-track-index="3">
+        <span>Morgens: keine Nachrichten, keine Mails.</span>
+      </div>
+      <div id="c5" class="cap clip" data-start="19" data-duration="4.8" data-track-index="3">
+        <span>An der Kasse: Kartenzahlung abgelehnt.</span>
+      </div>
+      <div id="c6" class="cap clip" data-start="24.3" data-duration="5.3" data-track-index="3">
+        <span>Online-Karten laden nicht. Die Straßen verstopfen.</span>
+      </div>
+      <div id="c7" class="cap clip" data-start="29.8" data-duration="5.8" data-track-index="3">
+        <span>Lieferungen stocken. Lkw stehen still.</span>
+      </div>
+      <div id="c8" class="cap clip" data-start="36.3" data-duration="5.2" data-track-index="3">
+        <span>Flughäfen streichen Flüge.</span>
+      </div>
+      <div id="c9" class="cap clip" data-start="42.2" data-duration="5.5" data-track-index="3">
+        <span>Krankenhäuser arbeiten wieder mit Papier.</span>
+      </div>
+      <div id="c10" class="cap clip" data-start="48.3" data-duration="5.3" data-track-index="3">
+        <span>Abends gehen die Menschen raus.</span>
+      </div>
+      <div id="c11" class="cap clip" data-start="53.8" data-duration="5.9" data-track-index="3">
+        <span>Und reden wieder miteinander.</span>
+      </div>
+      <div id="c12" class="cap clip" data-start="60.3" data-duration="4.5" data-track-index="3">
+        <span>Nachts zählen alle die Minuten.</span>
+      </div>
+      <div id="c13" class="cap clip" data-start="65" data-duration="4.8" data-track-index="3">
+        <span>23:59 Uhr …</span>
+      </div>
+      <div id="c14" class="cap clip" data-start="70.3" data-duration="3.8" data-track-index="3">
+        <span>00:00 Uhr: Das Netz ist zurück.</span>
+      </div>
+
+      <div id="end" class="clip" data-start="74.4" data-duration="5.6" data-track-index="2">
+        <span id="end-q">Was wäre, wenn das Internet 24 Stunden ausfällt?</span>
+        <span id="end-a">Und du? Wie lange hältst du es ohne Internet aus?</span>
+      </div>
+
+      <audio
+        id="score"
+        class="clip"
+        src="assets/music/score.mp3"
+        data-start="0"
+        data-duration="80"
+        data-track-index="10"
+        data-volume="0.7"
+        data-fade-out="2.5"
+      ></audio>
+      <audio
+        id="sfx-shutdown"
+        class="clip"
+        src="assets/sfx/shutdown.mp3"
+        data-start="4.9"
+        data-duration="3"
+        data-track-index="11"
+        data-volume="0.7"
+      ></audio>
+      <audio
+        id="sfx-queue"
+        class="clip"
+        src="assets/sfx/queue.mp3"
+        data-start="14"
+        data-duration="10"
+        data-track-index="11"
+        data-volume="1.4"
+        data-fade-in="0.6"
+        data-fade-out="1"
+      ></audio>
+      <audio
+        id="sfx-traffic"
+        class="clip"
+        src="assets/sfx/traffic.mp3"
+        data-start="24"
+        data-duration="10"
+        data-track-index="12"
+        data-volume="0.9"
+        data-fade-in="0.4"
+        data-fade-out="1.5"
+      ></audio>
+      <audio
+        id="sfx-evening"
+        class="clip"
+        src="assets/sfx/evening.mp3"
+        data-start="48"
+        data-duration="12"
+        data-track-index="11"
+        data-volume="3"
+        data-fade-in="1"
+        data-fade-out="1.5"
+      ></audio>
+      <audio
+        id="sfx-phones"
+        class="clip"
+        src="assets/sfx/phones.mp3"
+        data-start="70"
+        data-duration="7"
+        data-track-index="12"
+        data-volume="0.5"
+        data-fade-out="1.5"
+      ></audio>
+      <div id="flash" data-layout-ignore></div>
+      <div id="dip" data-layout-ignore></div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const ease = "power3.out";
+
+      tl.fromTo(
+        "#hook-t",
+        { opacity: 1, y: 0 },
+        { opacity: 0, y: -30, duration: 0.45, ease: "power2.in" },
+        4.5,
+      );
+
+      const caps = [
+        ["#c2", 5.4, 4],
+        ["#c3", 9.6, 4.2],
+        ["#c4", 14.3, 4.5],
+        ["#c5", 19, 4.8],
+        ["#c6", 24.3, 5.3],
+        ["#c7", 29.8, 5.8],
+        ["#c8", 36.3, 5.2],
+        ["#c9", 42.2, 5.5],
+        ["#c10", 48.3, 5.3],
+        ["#c11", 53.8, 5.9],
+        ["#c12", 60.3, 4.5],
+        ["#c13", 65, 4.8],
+        ["#c14", 70.3, 3.8],
+      ];
+      for (const [sel, start, dur] of caps) {
+        const span = sel + " span";
+        tl.fromTo(
+          span,
+          { opacity: 0, y: 26, filter: "blur(6px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.45, ease },
+          start,
+        );
+        tl.to(span, { opacity: 0, y: -14, duration: 0.3, ease: "power2.in" }, start + dur - 0.36);
+      }
+
+      // Cuts through black between chapters
+      for (const at of [13.85, 23.85, 35.85, 41.75, 47.85, 59.85]) {
+        tl.fromTo(
+          "#dip",
+          { opacity: 0 },
+          { opacity: 1, duration: 0.2, ease: "power2.in", immediateRender: at === 13.85 },
+          at,
+        );
+        tl.to("#dip", { opacity: 0, duration: 0.4, ease: "power2.out" }, at + 0.25);
+      }
+
+      // The network comes back: a white pulse
+      tl.fromTo("#flash", { opacity: 0 }, { opacity: 0.75, duration: 0.06, ease: "none" }, 70.0);
+      tl.to("#flash", { opacity: 0, duration: 0.6, ease: "power2.out" }, 70.06);
+
+      // End card
+      tl.fromTo("#endscrim", { opacity: 0 }, { opacity: 1, duration: 0.8, ease }, 74.2);
+      tl.fromTo("#end-q", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease }, 74.5);
+      tl.fromTo("#end-a", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease }, 76.0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+
+    <script type="module" src="world.js"></script>
+  </body>
+</html>
